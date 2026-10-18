@@ -32,11 +32,10 @@ const PG_ERRORS = {
  */
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
+  // Errors we created on purpose in the services
   if (err instanceof AppError) {
     const body = { message: err.message };
-    if (err.errors) {
-      body.errors = err.errors;
-    }
+    if (err.errors) body.errors = err.errors;
     return res.status(err.statusCode).json(body);
   }
 
@@ -53,7 +52,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Anything else is unexpected: log it, but never show internal details
   console.error(err);
-  return res.status(500).json({ message: "Internal Server Error" });
+  return res.status(500).json({ message: "Internal server error" });
 };
 
 module.exports = errorHandler;

@@ -1,0 +1,11 @@
+/**
+ * Health routes, mounted on /api/health.
+ */
+const express = require("express");
+const HealthController = require("./health.controller");
+
+const router = express.Router();
+
+router.get("/", HealthController.check);
+
+module.exports = router;
