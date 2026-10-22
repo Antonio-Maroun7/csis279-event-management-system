@@ -24,7 +24,7 @@ const idParam = (name = "id") =>
  * @param {number} max - Maximum length (same as the VARCHAR size).
  */
 const requiredText = (field, label, max) => {
-  body(field)
+  return body(field)
     .isString()
     .withMessage(`${label} is required`)
     .bail() // Stop running validations if any of the previous ones have failed.
@@ -40,7 +40,7 @@ const requiredText = (field, label, max) => {
  * @param {string} [field="email"]
  */
 const emailRule = (field = "email") => {
-  body(field)
+  return body(field)
     .isString()
     .withMessage(`${field} is required`)
     .bail()
@@ -60,7 +60,7 @@ const emailRule = (field = "email") => {
  * @param {string} [field="password"]
  */
 const passwordRule = (field = "password") => {
-  body(field)
+  return body(field)
     .isString()
     .withMessage(`${field} is required`)
     .bail()
