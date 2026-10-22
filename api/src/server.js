@@ -15,6 +15,11 @@ const PORT = process.env.PORT || 3000;
  * @returns {Promise<void>}
  */
 const start = async () => {
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET is missing. Add it to your .env file.");
+    process.exit(1);
+  }
+
   try {
     await pool.query("SELECT 1");
   } catch (error) {
