@@ -10,23 +10,24 @@ const FEATURES = [
 ];
 
 const LoginView = () => {
-  const { login } = useAuth(); // Destructure the login function from the auth context
-  const location = useLocation(); // Get the current location object
+  const { login } = useAuth();
+  const location = useLocation();
 
+  // GuestRoute redirects automatically once the user is set
   const handleLogin = async ({ email, password, remember }) => {
-    await login({ email: email.trim(), password, remember });
+    await login(email.trim(), password, remember);
   };
 
   return (
     <AuthLayout
       eyebrow="REAL-TIME EVENT MANAGEMENT"
-      title="Everything you event needs , in one place"
-      text="Create , discover and manage ..."
+      title="Everything your event needs, in one place."
+      text="Create, discover and manage memorable events with live seat updates, secure tickets and instant notifications."
       features={FEATURES}
     >
       <LoginForm
         onSubmit={handleLogin}
-        notice={location.state?.from ? "Please sign in to continue" : undefined}
+        notice={location.state?.from ? "Please sign in to continue." : ""}
       />
     </AuthLayout>
   );
