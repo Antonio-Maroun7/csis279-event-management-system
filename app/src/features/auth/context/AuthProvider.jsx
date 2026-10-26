@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AuthContext from "./AuthContext";
-import * as authService from "../services/authService";
+import * as authService from "../services/authServices";
 import {
   getToken,
   setToken,
