@@ -17,7 +17,7 @@ const UserMenu = () => {
 
   // close when clicking anywhere outside the menu
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) return undefined; // If the menu is not open, do nothing
 
     // Close the menu when clicking outside of it
     const handleClick = (event) => {
