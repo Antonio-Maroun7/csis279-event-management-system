@@ -9,8 +9,8 @@ const NotFoundView = () => {
         <p className="subtitle">
           The page you are looking for does not exist or was moved.
         </p>
-        <Button to="/" className="mt-3">
-          // Back to home
+        <Button to="/" className="mt-3">// Go back to the home page
+          Back to home
         </Button>
       </div>
     </div>
