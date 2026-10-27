@@ -1,9 +1,12 @@
 import { ROLE_LABELS, ROLES } from "../../../shared/config/roles";
 
+/**
+ * Search box + role filter above the users table.
+ */
 const UserFilters = ({ search, role, onSearchChange, onRoleChange }) => {
   return (
-    <div>
-      <div>
+    <div className="toolbar">
+      <div className="search">
         <input
           className="input"
           type="search"
@@ -29,3 +32,5 @@ const UserFilters = ({ search, role, onSearchChange, onRoleChange }) => {
     </div>
   );
 };
+
+export default UserFilters;
