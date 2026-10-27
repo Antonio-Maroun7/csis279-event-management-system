@@ -13,7 +13,7 @@ const Alert = ({ variant = "info", children, onClose, className = "" }) => {
       className={`notice notice-${variant} alert ${className}`}
       role={variant === "danger" ? "alert" : "status"} // set ARIA role based on variant
     >
-      <span>{children}</span>// the message content
+      <span>{children}</span>
       {onClose && (
         <button
           type="button"

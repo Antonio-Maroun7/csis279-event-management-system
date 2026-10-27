@@ -1,23 +1,28 @@
 import { ROLE_LABELS } from "../../../shared/config/roles";
 import { formatDate } from "../../../shared/utils/format";
 
+/**
+ * Read-only list of the account information (label / value rows).
+ */
 const ProfileDetails = ({ user }) => {
   const rows = [
-    ["First Name", user.firstName],
-    ["Last Name", user.lastName],
+    ["First name", user.first_name],
+    ["Last name", user.last_name],
     ["Email", user.email],
     ["Role", ROLE_LABELS[user.role]],
-    ["Member Since", formatDate(user.createdAt)],
+    ["Member since", formatDate(user.created_at)],
   ];
 
   return (
     <div>
       {rows.map(([label, value]) => (
-        <div key={label}>
+        <div className="kv" key={label}>
           <b>{label}</b>
-          <span> {value}</span>
+          <span>{value}</span>
         </div>
       ))}
     </div>
   );
 };
+
+export default ProfileDetails;

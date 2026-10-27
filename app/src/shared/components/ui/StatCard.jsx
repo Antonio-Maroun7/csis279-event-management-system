@@ -5,7 +5,7 @@ const StatCard = ({ label, value, icon, hint }) => {
   return (
     <div className="card stat">
       <div className="stat-top">
-        <span>{label}</span> // label for the stat card
+        <span>{label}</span>
         {icon && <div className="stat-icon">{icon}</div>}
       </div>
       <div className="stat-value">{value}</div>

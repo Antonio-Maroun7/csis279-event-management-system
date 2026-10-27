@@ -21,8 +21,7 @@ const ProfileHeader = ({ user, editing, onEdit }) => {
             </Badge>
           </div>
         </div>
-        {!editing && <Button onClick={onEdit}>Edit profile</Button>} // Show
-        edit button only when not editing
+        {!editing && <Button onClick={onEdit}>Edit profile</Button>}
       </div>
     </section>
   );
