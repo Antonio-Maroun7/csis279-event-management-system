@@ -4,6 +4,7 @@
  */
 const express = require("express");
 const UserController = require("./user.controller");
+const TwoFactorController = require("../twoFactor/twoFactor.controller");
 const authenticate = require("../../shared/middleware/authenticate");
 const authorize = require("../../shared/middleware/authorize");
 const {
@@ -52,6 +53,14 @@ router.delete(
   authorize("admin"),
   ...validateUserId,
   UserController.deleteUser,
+);
+
+// Admin: reset 2FA for a user who lost their phone and backup codes
+router.delete(
+  "/:id/two-factor",
+  authorize("admin"),
+  ...validateUserId,
+  TwoFactorController.adminReset,
 );
 
 module.exports = router;

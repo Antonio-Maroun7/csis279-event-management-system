@@ -3,7 +3,10 @@
  */
 const bcrypt = require("bcrypt");
 const AppError = require("../../shared/errors/AppError");
-const { signAccessToken } = require("../../shared/utils/jwt");
+const {
+  signAccessToken,
+  signTwoFactorToken,
+} = require("../../shared/utils/jwt");
 const UserRepository = require("../users/user.repository");
 const UserDto = require("../users/user.dto");
 
@@ -69,6 +72,13 @@ class AuthService {
     const passwordMatches = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatches) {
       throw invalid;
+    }
+
+    if (user.two_factor_enabled) {
+      return {
+        requires_two_factors: true, // Indicates that the user needs to complete two-factor authentication
+        temp_token: signTwoFactorToken(user), // Temporary token for the second step of two-factor authentication
+      };
     }
 
     return AuthService.buildAuthResponse(user);

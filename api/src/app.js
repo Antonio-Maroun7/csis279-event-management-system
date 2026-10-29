@@ -12,6 +12,7 @@ const notFound = require("./shared/middleware/notFound");
 const errorHandler = require("./shared/middleware/errorhandler");
 const authRoutes = require("./features/auth/auth.routes");
 const userRoutes = require("./features/users/user.routes");
+const twoFactorRoutes = require("../../api/src/features/twoFactor/twoFactor.routes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 // Feature routes
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/auth/2fa", twoFactorRoutes);
 app.use("/api/users", userRoutes);
 
 // Must stay last

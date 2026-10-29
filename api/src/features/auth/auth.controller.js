@@ -32,10 +32,13 @@ class AuthController {
    * @param {import("express").NextFunction} next
    * @returns {Promise<void>}
    */
-  static async login(req, res, next) {
+    static async login(req, res, next) {
     try {
       const result = await AuthService.login(req.body);
-      res.status(200).json({ message: "Login successful", ...result });
+      const message = result.requires_two_factor
+        ? "Enter your two-factor code to continue"
+        : "Login successful";
+      res.status(200).json({ message, ...result });
     } catch (err) {
       next(err);
     }
