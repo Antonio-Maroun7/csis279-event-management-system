@@ -228,6 +228,57 @@ class UserRepository {
   }
 
   /**
+   * Saves a new (encrypted) 2FA secret. 2FA stays off until the user confirms a code.
+   * Side effects: updates one users row.
+   * @param {number} id
+   * @param {string} encryptedSecret
+   * @returns {Promise<boolean>}
+   */
+  static async saveTwoFactorSecret(id, encryptedSecret) {
+    const { rowCount } = await pool.query(
+      `UPDATE users
+       SET two_factor_secret = $1, two_factor_enabled = false, updated_at = NOW()
+       WHERE id = $2`,
+      [encryptedSecret, id],
+    );
+    return rowCount > 0;
+  }
+
+  /**
+   * Turns 2FA on (only if a secret was saved before).
+   * Side effects: updates one users row.
+   * @param {number} id
+   * @returns {Promise<UserEntity|null>}
+   */
+  static async enableTwoFactor(id) {
+    const { rows } = await pool.query(
+      `UPDATE users
+       SET two_factor_enabled = true, updated_at = NOW()
+       WHERE id = $1 AND two_factor_secret IS NOT NULL
+       RETURNING ${PUBLIC_COLUMNS}`,
+      [id],
+    );
+    return UserEntity.fromRow(rows[0]);
+  }
+
+  /**
+   * Turns 2FA off and forgets the secret.
+   * Side effects: updates one users row.
+   * @param {number} id
+   * @returns {Promise<UserEntity|null>}
+   */
+  static async clearTwoFactor(id) {
+    const { rows } = await pool.query(
+      `UPDATE users
+       SET two_factor_secret = NULL, two_factor_enabled = false, updated_at = NOW()
+       WHERE id = $1
+       RETURNING ${PUBLIC_COLUMNS}`,
+      [id],
+    );
+    return UserEntity.fromRow(rows[0]);
+  }
+
+  /**
    * Counts the confirmed (active) registrations of a user.
    * @param {number} id
    * @returns {Promise<number>}
