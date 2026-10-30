@@ -76,7 +76,7 @@ class AuthService {
 
     if (user.two_factor_enabled) {
       return {
-        requires_two_factors: true, // Indicates that the user needs to complete two-factor authentication
+        requires_two_factor: true, // Indicates that the user needs to complete two-factor authentication
         temp_token: signTwoFactorToken(user), // Temporary token for the second step of two-factor authentication
       };
     }

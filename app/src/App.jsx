@@ -6,10 +6,10 @@ import RoleLayout from "./shared/components/layout/RoleLayout";
 import NotFoundView from "./shared/views/NotFoundView";
 import LoginView from "./features/auth/views/LoginView";
 import RegisterView from "./features/auth/views/RegisterView";
-import TwoFactorView from "./features/auth/views/TwoFactorView";
+import TwoFactorVerifyView from "./features/auth/views/TwoFactorVerifyView";
 import ProfileView from "./features/users/views/ProfileView";
-import SecurityView from "./features/users/views/SecurityView";
 import AdminUsersView from "./features/users/views/AdminUsersView";
+import SecuritySettingsView from "./features/twoFactor/views/SecuritySettingsView";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegisterView />} />
-        <Route path="/2fa" element={<TwoFactorView />} />
+        <Route path="/2fa" element={<TwoFactorVerifyView />} />
       </Route>
 
       {/* everything below needs a logged-in user */}
@@ -26,7 +26,7 @@ function App() {
         <Route element={<RoleLayout />}>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/profile" element={<ProfileView />} />
-          <Route path="/security" element={<SecurityView />} />
+          <Route path="/security" element={<SecuritySettingsView />} />
 
           {/* admin only */}
           <Route element={<ProtectedRoute roles={["admin"]} />}>
