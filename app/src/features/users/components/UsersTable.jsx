@@ -7,8 +7,16 @@ import { formatDate, getFullName } from "../../../shared/utils/format";
 /**
  * Admin table of users. The role can be changed inline with the select.
  * The logged-in admin cannot change or delete their own account.
+ * "Reset 2FA" helps a user who lost their phone and their backup codes.
  */
-const UsersTable = ({ users, currentUserId, busyUserId, onRoleChange, onDelete }) => {
+const UsersTable = ({
+  users,
+  currentUserId,
+  busyUserId,
+  onRoleChange,
+  onResetTwoFactor,
+  onDelete,
+}) => {
   return (
     <div className="card table-wrap">
       <table className="table">
@@ -33,7 +41,8 @@ const UsersTable = ({ users, currentUserId, busyUserId, onRoleChange, onDelete }
                     <Avatar user={user} />
                     <div>
                       <div className="name-cell">
-                        {getFullName(user)} {isMe && <span className="small">(you)</span>}
+                        {getFullName(user)}{" "}
+                        {isMe && <span className="small">(you)</span>}
                       </div>
                       <div className="small">{user.email}</div>
                     </div>
@@ -41,13 +50,17 @@ const UsersTable = ({ users, currentUserId, busyUserId, onRoleChange, onDelete }
                 </td>
                 <td>
                   {isMe ? (
-                    <Badge color={ROLE_COLORS[user.role]}>{ROLE_LABELS[user.role]}</Badge>
+                    <Badge color={ROLE_COLORS[user.role]}>
+                      {ROLE_LABELS[user.role]}
+                    </Badge>
                   ) : (
                     <select
                       className="select select-inline"
                       value={user.role}
                       disabled={busy}
-                      onChange={(event) => onRoleChange(user, event.target.value)}
+                      onChange={(event) =>
+                        onRoleChange(user, event.target.value)
+                      }
                       aria-label={`Role of ${getFullName(user)}`}
                     >
                       {ROLES.map((role) => (
@@ -65,14 +78,26 @@ const UsersTable = ({ users, currentUserId, busyUserId, onRoleChange, onDelete }
                 </td>
                 <td>{formatDate(user.created_at)}</td>
                 <td className="text-end">
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    disabled={isMe || busy}
-                    onClick={() => onDelete(user)}
-                  >
-                    Delete
-                  </Button>
+                  <div className="table-actions">
+                    {user.two_factor_enabled && !isMe && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => onResetTwoFactor(user)}
+                      >
+                        Reset 2FA
+                      </Button>
+                    )}
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      disabled={isMe || busy}
+                      onClick={() => onDelete(user)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </td>
               </tr>
             );

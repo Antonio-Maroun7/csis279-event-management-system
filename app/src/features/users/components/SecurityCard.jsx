@@ -34,9 +34,14 @@ const SecurityCard = ({ user, onChangePassword }) => {
         </div>
       </div>
 
-      <Button variant="secondary" onClick={onChangePassword}>
-        Change password
-      </Button>
+      <div className="card-actions">
+        <Button variant="secondary" to="/security">
+          Open security settings
+        </Button>
+        <Button variant="ghost" onClick={onChangePassword}>
+          Change password
+        </Button>
+      </div>
 
       {enabled ? (
         <div className="notice notice-success mt-3">
