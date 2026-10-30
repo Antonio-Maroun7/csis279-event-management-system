@@ -13,7 +13,12 @@ import { ROLE_LABELS } from "../../../shared/config/roles";
 import { getFullName } from "../../../shared/utils/format";
 import UserFilters from "../components/UserFilters";
 import UsersTable from "../components/UsersTable";
-import { changeUserRole, deleteUser, getUsers } from "../services/userService";
+import {
+  changeUserRole,
+  deleteUser,
+  getUsers,
+  resetUserTwoFactor,
+} from "../services/userService";
 
 const PAGE_SIZE = 8;
 
@@ -29,6 +34,8 @@ const AdminUsersView = () => {
   const [busyUserId, setBusyUserId] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [userToReset, setUserToReset] = useState(null);
+  const [resetting, setResetting] = useState(false);
 
   // a new function = new filters = useFetch loads the list again
   const fetchUsers = useCallback(
@@ -91,6 +98,24 @@ const AdminUsersView = () => {
     } finally {
       setDeleting(false);
       setUserToDelete(null);
+    }
+  };
+
+  const handleConfirmResetTwoFactor = async () => {
+    try {
+      setResetting(true);
+      setError("");
+      setSuccess("");
+      await resetUserTwoFactor(userToReset.id);
+      setSuccess(
+        `Two-factor authentication was reset for ${getFullName(userToReset)}. They can sign in with their password only.`,
+      );
+      await reload();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResetting(false);
+      setUserToReset(null);
     }
   };
 
@@ -170,6 +195,7 @@ const AdminUsersView = () => {
             currentUserId={currentUser.id}
             busyUserId={busyUserId}
             onRoleChange={handleRoleChange}
+            onResetTwoFactor={setUserToReset}
             onDelete={setUserToDelete}
           />
           <Pagination
@@ -192,6 +218,20 @@ const AdminUsersView = () => {
         loading={deleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setUserToDelete(null)}
+      />
+
+      <ConfirmModal
+        show={Boolean(userToReset)}
+        title="Reset two-factor authentication?"
+        message={
+          userToReset &&
+          `Use this only after confirming the identity of ${getFullName(userToReset)}. Their authenticator and backup codes will stop working, and they will sign in with their password only.`
+        }
+        confirmLabel="Reset 2FA"
+        icon="✦"
+        loading={resetting}
+        onConfirm={handleConfirmResetTwoFactor}
+        onCancel={() => setUserToReset(null)}
       />
     </>
   );

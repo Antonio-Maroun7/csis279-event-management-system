@@ -60,6 +60,9 @@ const UserMenu = () => {
           <Link to="/profile" role="menuitem" onClick={() => setOpen(false)}>
             Profile & preferences
           </Link>
+          <Link to="/security" role="menuitem" onClick={() => setOpen(false)}>
+            Security settings
+          </Link>
           <button type="button" role="menuitem" onClick={handleLogout}>
             Log out
           </button>
