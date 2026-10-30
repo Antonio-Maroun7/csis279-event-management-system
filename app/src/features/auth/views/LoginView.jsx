@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "../../../shared/components/layout/AuthLayout";
 import useAuth from "../context/useAuth";
 import LoginForm from "../components/LoginForm";
@@ -12,10 +12,16 @@ const FEATURES = [
 const LoginView = () => {
   const { login } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // GuestRoute redirects automatically once the user is set
   const handleLogin = async ({ email, password, remember }) => {
-    await login(email.trim(), password, remember);
+    const result = await login(email.trim(), password, remember);
+
+    // 2FA on: go to the code page (keep "from" so we can return there after)
+    if (result.requiresTwoFactor) {
+      navigate("/2fa", { state: location.state });
+    }
+    // otherwise GuestRoute redirects automatically once the user is set
   };
 
   return (
