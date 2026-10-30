@@ -1,5 +1,10 @@
-const CategoryController = require("./category.controller");
+/**
+ * Category routes, mounted on /api/categories.
+ * Reading is public (the events list and filters need it);
+ * creating, renaming and deleting are for admins only.
+ */
 const express = require("express");
+const CategoryController = require("./category.controller");
 const authenticate = require("../../shared/middleware/authenticate");
 const authorize = require("../../shared/middleware/authorize");
 const {
@@ -11,22 +16,11 @@ const {
 
 const router = express.Router();
 
-router.get(
-  "/",
-  authenticate,
-  authorize,
-  ...validateListCategories,
-  CategoryController.listCategories,
-);
+// Public
+router.get("/", ...validateListCategories, CategoryController.listCategories);
+router.get("/:id", ...validateCategoryId, CategoryController.getCategoryById);
 
-router.get(
-  "/id",
-  authenticate,
-  ...validateCategoryId,
-
-  CategoryController.getCategoryById,
-);
-
+// Admin only
 router.post(
   "/",
   authenticate,
@@ -34,19 +28,19 @@ router.post(
   ...validateCreateCategory,
   CategoryController.createCategory,
 );
-
 router.put(
-  "/id",
+  "/:id",
   authenticate,
   authorize("admin"),
   ...validateUpdateCategory,
   CategoryController.updateCategory,
 );
-
 router.delete(
-  "/id",
+  "/:id",
   authenticate,
   authorize("admin"),
   ...validateCategoryId,
   CategoryController.deleteCategory,
 );
+
+module.exports = router;

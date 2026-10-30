@@ -32,6 +32,16 @@ const USERS = [
   },
 ];
 
+const CATEGORIES = [
+  "Technology",
+  "Sports",
+  "Workshop",
+  "Conference",
+  "Seminar",
+  "Community",
+  "Music",
+];
+
 /**
  * Inserts the demo users.
  * @param {import("pg").PoolClient} client
@@ -50,11 +60,29 @@ const seedUsers = async (client) => {
   console.log(`Users: ${USERS.length} demo accounts ready`);
 };
 
+/**
+ * Inserts the demo categories.
+ * @param {import("pg").PoolClient} client
+ * @returns {Promise<void>}
+ */
+const seedCategories = async (client) => {
+  for (const name of CATEGORIES) {
+    await client.query(
+      `INSERT INTO categories (name)
+       VALUES ($1)
+       ON CONFLICT (name) DO NOTHING`,
+      [name],
+    );
+  }
+  console.log(`Categories: ${CATEGORIES.length} demo categories ready`);
+};
+
 const run = async () => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     await seedUsers(client);
+    await seedCategories(client);
     await client.query("COMMIT");
     console.log("Seed completed");
   } catch (error) {
