@@ -31,3 +31,11 @@ export const changeUserRole = async (id, role) => {
 /** DELETE /api/users/:id */
 export const deleteUser = (id) =>
   apiFetch(`/users/${id}`, { method: "DELETE" });
+
+/** DELETE /api/users/:id/two-factor -> { user } (admin resets a user's 2FA) */
+export const resetUserTwoFactor = async (id) => {
+  const result = await apiFetch(`/users/${id}/two-factor`, {
+    method: "DELETE",
+  });
+  return result.user;
+};

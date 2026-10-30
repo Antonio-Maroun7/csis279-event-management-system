@@ -19,3 +19,13 @@ export const getCurrentUser = async () => {
   const data = await apiFetch("/users/me");
   return data.user;
 };
+
+/**
+ * POST /api/auth/2fa/verify -> { token, user, used_backup_code, backup_codes_left? }
+ * Second step of the login when 2FA is on.
+ */
+export const verifyTwoFactor = (tempToken, code) =>
+  apiFetch("/auth/2fa/verify", {
+    method: "POST",
+    body: { temp_token: tempToken, code },
+  });
