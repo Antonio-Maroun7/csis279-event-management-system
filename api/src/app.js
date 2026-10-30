@@ -13,6 +13,7 @@ const errorHandler = require("./shared/middleware/errorhandler");
 const authRoutes = require("./features/auth/auth.routes");
 const userRoutes = require("./features/users/user.routes");
 const twoFactorRoutes = require("../../api/src/features/twoFactor/twoFactor.routes");
+const categoryRoutes = require("./features/categories/category.routes");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/auth/2fa", twoFactorRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Must stay last
 app.use(notFound);
