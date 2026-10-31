@@ -22,6 +22,15 @@ export const formatDate = (value) => {
  * @param {Object} params
  * @returns {string}
  */
+
+/**
+ * 12500 -> "12,500"
+ * @param {number} value
+ * @returns {string}
+ */
+export const formatNumber = (value) =>
+  new Intl.NumberFormat("en-US").format(Number(value) || 0);
+
 export const toQueryString = (params = {}) => {
   const query = new URLSearchParams();
 

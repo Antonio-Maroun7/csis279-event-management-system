@@ -12,7 +12,7 @@ const notFound = require("./shared/middleware/notFound");
 const errorHandler = require("./shared/middleware/errorhandler");
 const authRoutes = require("./features/auth/auth.routes");
 const userRoutes = require("./features/users/user.routes");
-const twoFactorRoutes = require("../../api/src/features/twoFactor/twoFactor.routes");
+const twoFactorRoutes = require("./features/twoFactor/twoFactor.routes");
 const categoryRoutes = require("./features/categories/category.routes");
 const venueRoutes = require("./features/venues/venue.routes");
 
