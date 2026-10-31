@@ -18,18 +18,18 @@ export const formatDate = (value) => {
 };
 
 /**
- * Builds "?a=1&b=2" from an object, skipping empty values.
- * @param {Object} params
- * @returns {string}
- */
-
-/**
  * 12500 -> "12,500"
  * @param {number} value
  * @returns {string}
  */
 export const formatNumber = (value) =>
   new Intl.NumberFormat("en-US").format(Number(value) || 0);
+
+/**
+ * Builds "?a=1&b=2" from an object, skipping empty values.
+ * @param {Object} params
+ * @returns {string}
+ */
 
 export const toQueryString = (params = {}) => {
   const query = new URLSearchParams();
