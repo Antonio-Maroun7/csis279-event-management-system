@@ -14,6 +14,7 @@ const authRoutes = require("./features/auth/auth.routes");
 const userRoutes = require("./features/users/user.routes");
 const twoFactorRoutes = require("../../api/src/features/twoFactor/twoFactor.routes");
 const categoryRoutes = require("./features/categories/category.routes");
+const venueRoutes = require("./features/venues/venue.routes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth/2fa", twoFactorRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/venues", venueRoutes);
 
 // Must stay last
 app.use(notFound);

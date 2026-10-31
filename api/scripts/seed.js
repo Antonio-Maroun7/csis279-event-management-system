@@ -3,6 +3,11 @@
  * Run with: npm run seed
  * Safe to run many times (existing emails are skipped).
  */
+/**
+ * Seed script: inserts demo accounts (one per role), categories and venues.
+ * Run with: npm run seed
+ * Safe to run many times (rows that already exist are skipped).
+ */
 require("dotenv").config();
 
 const bcrypt = require("bcrypt");
@@ -42,6 +47,39 @@ const CATEGORIES = [
   "Music",
 ];
 
+const VENUES = [
+  {
+    name: "Innovation Hall",
+    address: "University Campus, Block A",
+    city: "Koura",
+    max_capacity: 300,
+  },
+  {
+    name: "Sports Center",
+    address: "University Campus, Gate 2",
+    city: "Koura",
+    max_capacity: 500,
+  },
+  {
+    name: "Main Auditorium",
+    address: "Downtown, Al Tall Square",
+    city: "Tripoli",
+    max_capacity: 180,
+  },
+  {
+    name: "Harbor Conference Center",
+    address: "Seaside Road, Building 12",
+    city: "Beirut",
+    max_capacity: 250,
+  },
+  {
+    name: "Open Air Theatre",
+    address: "Old Port Street",
+    city: "Byblos",
+    max_capacity: 400,
+  },
+];
+
 /**
  * Inserts the demo users.
  * @param {import("pg").PoolClient} client
@@ -77,12 +115,33 @@ const seedCategories = async (client) => {
   console.log(`Categories: ${CATEGORIES.length} demo categories ready`);
 };
 
+/**
+ * Inserts the demo venues (skips a venue that already exists in the same city).
+ * @param {import("pg").PoolClient} client
+ * @returns {Promise<void>}
+ */
+const seedVenues = async (client) => {
+  for (const venue of VENUES) {
+    await client.query(
+      `INSERT INTO venues (name, address, city, max_capacity)
+       SELECT $1::varchar, $2::varchar, $3::varchar, $4::int
+       WHERE NOT EXISTS (
+         SELECT 1 FROM venues
+         WHERE LOWER(name) = LOWER($1) AND LOWER(city) = LOWER($3)
+       )`,
+      [venue.name, venue.address, venue.city, venue.max_capacity],
+    );
+  }
+  console.log(`Venues: ${VENUES.length} demo venues ready`);
+};
+
 const run = async () => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     await seedUsers(client);
     await seedCategories(client);
+    await seedVenues(client);
     await client.query("COMMIT");
     console.log("Seed completed");
   } catch (error) {
