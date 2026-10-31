@@ -10,6 +10,7 @@ import TwoFactorVerifyView from "./features/auth/views/TwoFactorVerifyView";
 import ProfileView from "./features/users/views/ProfileView";
 import AdminUsersView from "./features/users/views/AdminUsersView";
 import SecuritySettingsView from "./features/twoFactor/views/SecuritySettingsView";
+import AdminCategoriesView from "./features/categories/views/AdminCategoriesView";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           {/* admin only */}
           <Route element={<ProtectedRoute roles={["admin"]} />}>
             <Route path="/admin/users" element={<AdminUsersView />} />
+            <Route path="/admin/categories" element={<AdminCategoriesView />} />
           </Route>
         </Route>
       </Route>

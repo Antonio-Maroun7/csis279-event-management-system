@@ -24,6 +24,7 @@ export const NAV_ITEMS = {
   organizer: [{ to: "/profile", label: "Profile", icon: "◉" }], // navigation items for organizer role
   admin: [
     { to: "/admin/users", label: "Users", icon: "◎" },
+    { to: "/admin/categories", label: "Categories", icon: "#" },
     { to: "/profile", label: "Profile", icon: "◉" },
   ], // navigation items for admin role
 };
