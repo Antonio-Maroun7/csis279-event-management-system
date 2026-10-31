@@ -11,6 +11,7 @@ import ProfileView from "./features/users/views/ProfileView";
 import AdminUsersView from "./features/users/views/AdminUsersView";
 import SecuritySettingsView from "./features/twoFactor/views/SecuritySettingsView";
 import AdminCategoriesView from "./features/categories/views/AdminCategoriesView";
+import AdminVenuesView from "./features/venues/views/AdminVenuesView";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route element={<ProtectedRoute roles={["admin"]} />}>
             <Route path="/admin/users" element={<AdminUsersView />} />
             <Route path="/admin/categories" element={<AdminCategoriesView />} />
+            <Route path="/admin/venues" element={<AdminVenuesView />} />
           </Route>
         </Route>
       </Route>
