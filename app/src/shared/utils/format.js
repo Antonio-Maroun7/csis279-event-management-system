@@ -18,6 +18,35 @@ export const formatDate = (value) => {
 };
 
 /**
+ * "10:00 AM" (in the user's own time zone)
+ * @param {string|Date} value
+ * @returns {string}
+ */
+export const formatTime = (value) => {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+};
+
+/**
+ * "Tue, 10 Nov 2026 • 10:00 AM"
+ * @param {string|Date} value
+ * @returns {string}
+ */
+export const formatDateTime = (value) => {
+  if (!value) return "—";
+  const date = new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+  return `${date} • ${formatTime(value)}`;
+};
+
+/**
  * 12500 -> "12,500"
  * @param {number} value
  * @returns {string}
