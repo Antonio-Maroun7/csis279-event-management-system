@@ -12,6 +12,8 @@ import AdminUsersView from "./features/users/views/AdminUsersView";
 import SecuritySettingsView from "./features/twoFactor/views/SecuritySettingsView";
 import AdminCategoriesView from "./features/categories/views/AdminCategoriesView";
 import AdminVenuesView from "./features/venues/views/AdminVenuesView";
+import EventsView from "./features/events/views/EventsView";
+import EventDetailsView from "./features/events/views/EventDetailsView";
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/profile" element={<ProfileView />} />
           <Route path="/security" element={<SecuritySettingsView />} />
+          <Route path="/events" element={<EventsView />} />
+          <Route path="/events/:id" element={<EventDetailsView />} />
 
           {/* admin only */}
           <Route element={<ProtectedRoute roles={["admin"]} />}>

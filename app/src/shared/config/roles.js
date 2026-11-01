@@ -20,8 +20,14 @@ export const ROLE_COLORS = {
 
 export const NAV_ITEMS = {
   // navigation items for each role
-  attendee: [{ to: "/profile", label: "Profile", icon: "◉" }], // navigation items for attendee role
-  organizer: [{ to: "/profile", label: "Profile", icon: "◉" }], // navigation items for organizer role
+  attendee: [
+    { to: "/events", label: "Events", icon: "⌂" },
+    { to: "/profile", label: "Profile", icon: "◉" },
+  ], // navigation items for attendee role
+  organizer: [
+    { to: "/events", label: "Events", icon: "▦" },
+    { to: "/profile", label: "Profile", icon: "◉" },
+  ], // navigation items for organizer role
   admin: [
     { to: "/admin/users", label: "Users", icon: "◎" },
     { to: "/admin/venues", label: "Venues", icon: "⌂" },
@@ -34,4 +40,4 @@ export const getNavItems = (role) => NAV_ITEMS[role] || []; // returns navigatio
 
 // first page a user sees after logging in
 export const getHomePath = (role) =>
-  role === "admin" ? "/admin/users" : "/profile";
+  role === "admin" ? "/admin/users" : "/events";
