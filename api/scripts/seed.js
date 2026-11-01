@@ -1,10 +1,5 @@
 /**
- * Seed script: inserts demo accounts so you can log in with every role.
- * Run with: npm run seed
- * Safe to run many times (existing emails are skipped).
- */
-/**
- * Seed script: inserts demo accounts (one per role), categories and venues.
+ * Seed script: inserts demo accounts (one per role), categories, venues and events.
  * Run with: npm run seed
  * Safe to run many times (rows that already exist are skipped).
  */
@@ -80,6 +75,86 @@ const VENUES = [
   },
 ];
 
+// days_from_now keeps the demo events in the future every time you run the seed
+const EVENTS = [
+  {
+    title: "AI & The Future of Software",
+    description:
+      "A practical conference exploring AI-assisted development, modern software architecture and the future of engineering teams.",
+    category: "Technology",
+    venue: "Innovation Hall",
+    days_from_now: 10,
+    start: "10:00",
+    end: "13:00",
+    capacity: 100,
+    price: 10,
+    status: "published",
+  },
+  {
+    title: "University Futsal Tournament",
+    description:
+      "Teams from every faculty compete in a one-day futsal tournament. Supporters welcome!",
+    category: "Sports",
+    venue: "Sports Center",
+    days_from_now: 14,
+    start: "17:30",
+    end: "21:00",
+    capacity: 200,
+    price: 0,
+    status: "published",
+  },
+  {
+    title: "Modern Web Development Bootcamp",
+    description:
+      "A full-day hands-on workshop on React, Express and PostgreSQL. Bring your laptop.",
+    category: "Workshop",
+    venue: "Main Auditorium",
+    days_from_now: 20,
+    start: "09:00",
+    end: "16:00",
+    capacity: 60,
+    price: 15,
+    status: "published",
+  },
+  {
+    title: "Community Clean-Up Day",
+    description:
+      "Join volunteers to clean the old port area. Gloves and bags are provided.",
+    category: "Community",
+    venue: "Open Air Theatre",
+    days_from_now: 25,
+    start: "08:00",
+    end: "12:00",
+    capacity: 150,
+    price: 0,
+    status: "published",
+  },
+  {
+    title: "Acoustic Night",
+    description: "Student bands play unplugged under the stars.",
+    category: "Music",
+    venue: "Open Air Theatre",
+    days_from_now: 30,
+    start: "19:00",
+    end: "22:00",
+    capacity: 300,
+    price: 20,
+    status: "published",
+  },
+  {
+    title: "Spring Tech Meetup",
+    description: "Lightning talks from students and local startups.",
+    category: "Conference",
+    venue: "Harbor Conference Center",
+    days_from_now: 40,
+    start: "18:00",
+    end: "20:00",
+    capacity: 50,
+    price: 0,
+    status: "draft",
+  },
+];
+
 /**
  * Inserts the demo users.
  * @param {import("pg").PoolClient} client
@@ -135,6 +210,43 @@ const seedVenues = async (client) => {
   console.log(`Venues: ${VENUES.length} demo venues ready`);
 };
 
+/**
+ * Inserts the demo events, all created by the demo organizer
+ * (skips an event whose title already exists).
+ * @param {import("pg").PoolClient} client
+ * @returns {Promise<void>}
+ */
+const seedEvents = async (client) => {
+  for (const event of EVENTS) {
+    await client.query(
+      `INSERT INTO events
+         (organizer_id, venue_id, category_id, title, description,
+          start_time, end_time, capacity, price, status)
+       SELECT u.id, v.id, c.id, $1::varchar, $2::text,
+              (CURRENT_DATE + $3::int) + $4::time,
+              (CURRENT_DATE + $3::int) + $5::time,
+              $6::int, $7::numeric, $8::varchar
+       FROM users u, venues v, categories c
+       WHERE u.email = 'organizer@eventflow.com'
+         AND v.name = $9 AND c.name = $10
+         AND NOT EXISTS (SELECT 1 FROM events WHERE title = $1)`,
+      [
+        event.title,
+        event.description,
+        event.days_from_now,
+        event.start,
+        event.end,
+        event.capacity,
+        event.price,
+        event.status,
+        event.venue,
+        event.category,
+      ],
+    );
+  }
+  console.log(`Events: ${EVENTS.length} demo events ready`);
+};
+
 const run = async () => {
   const client = await pool.connect();
   try {
@@ -142,6 +254,7 @@ const run = async () => {
     await seedUsers(client);
     await seedCategories(client);
     await seedVenues(client);
+    await seedEvents(client);
     await client.query("COMMIT");
     console.log("Seed completed");
   } catch (error) {
