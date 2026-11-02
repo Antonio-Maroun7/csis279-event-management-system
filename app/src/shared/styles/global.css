@@ -1913,3 +1913,62 @@ textarea {
     height: 220px;
   }
 }
+
+/* ---------- Organizer (dashboard table, event form) ---------- */
+.table-progress {
+  width: 120px;
+  margin-top: 7px;
+}
+
+.title-link {
+  color: inherit;
+}
+
+.title-link:hover {
+  color: #5145cd;
+  text-decoration: underline;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(290px, 0.7fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.check-list {
+  list-style: none;
+  margin: 15px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+  font-size: 12px;
+}
+
+.check-list li {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  color: #667085;
+}
+
+.check-list li:before {
+  content: "○";
+  font-weight: 900;
+  color: #98a2b3;
+}
+
+.check-list li.done {
+  color: #087443;
+}
+
+.check-list li.done:before {
+  content: "✓";
+  color: #12b76a;
+}
+
+@media (max-width: 900px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+}
