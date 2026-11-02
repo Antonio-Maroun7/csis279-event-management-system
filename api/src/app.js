@@ -16,6 +16,8 @@ const twoFactorRoutes = require("./features/twoFactor/twoFactor.routes");
 const categoryRoutes = require("./features/categories/category.routes");
 const venueRoutes = require("./features/venues/venue.routes");
 const eventRoutes = require("./features/events/event.routes");
+const registrationRoutes = require("./features/registrations/registration.routes");
+const eventRegistrationRoutes = require("./features/registrations/eventRegistration.routes");
 
 const app = express();
 
@@ -38,6 +40,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/venues", venueRoutes);
 app.use("/api/events", eventRoutes);
+// Nested event routes (/register, /my-registration, /attendees, /check-in): after eventRoutes
+app.use("/api/events/:eventId", eventRegistrationRoutes);
+app.use("/api/registrations", registrationRoutes);
 
 // Must stay last
 app.use(notFound);

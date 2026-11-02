@@ -160,13 +160,14 @@ class EventRepository {
 
   /**
    * Dashboard numbers for one organizer (or everybody when organizerId is null):
-   * events per status and the upcoming published events.
+   * events per status, the upcoming published events and the checked-in tickets.
    * @param {number|null} organizerId
-   * @returns {Promise<{ counts: Object, upcoming: number, next_start_time: Date|null }>}
+   * @returns {Promise<{ counts: Object, upcoming: number, next_start_time: Date|null, checked_in: number }>}
    */
   static async getManagedStats(organizerId) {
     const params = organizerId ? [organizerId] : [];
     const where = organizerId ? "WHERE organizer_id = $1" : "";
+    const checkedInOwner = organizerId ? "AND e2.organizer_id = $1" : "";
 
     const { rows } = await pool.query(
       `SELECT
@@ -176,7 +177,14 @@ class EventRepository {
          COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled,
          COUNT(*) FILTER (WHERE status = 'completed')::int AS completed,
          COUNT(*) FILTER (WHERE status = 'published' AND start_time > NOW())::int AS upcoming,
-         MIN(start_time) FILTER (WHERE status = 'published' AND start_time > NOW()) AS next_start_time
+         MIN(start_time) FILTER (WHERE status = 'published' AND start_time > NOW()) AS next_start_time,
+         (SELECT COUNT(*)
+          FROM tickets t
+          JOIN registrations r ON r.id = t.registration_id
+          JOIN events e2 ON e2.id = r.event_id
+          WHERE t.checked_in_at IS NOT NULL
+            AND r.status = 'confirmed'
+            AND e2.status <> 'cancelled' ${checkedInOwner})::int AS checked_in
        FROM events
        ${where}`,
       params,
@@ -193,6 +201,7 @@ class EventRepository {
       },
       upcoming: row.upcoming,
       next_start_time: row.next_start_time,
+      checked_in: row.checked_in,
     };
   }
 

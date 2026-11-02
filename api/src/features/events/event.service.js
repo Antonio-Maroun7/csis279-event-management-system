@@ -93,6 +93,7 @@ class EventService {
       counts: stats.counts,
       stats: {
         registrations,
+        checked_in: stats.checked_in,
         upcoming: stats.upcoming,
         next_start_time: stats.next_start_time,
       },

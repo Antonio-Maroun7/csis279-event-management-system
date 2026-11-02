@@ -1,5 +1,6 @@
 /**
- * Seed script: inserts demo accounts (one per role), categories, venues and events.
+ * Seed script: inserts demo accounts (one per role), categories, venues, events
+ * and two demo registrations with tickets.
  * Run with: npm run seed
  * Safe to run many times (rows that already exist are skipped).
  */
@@ -7,6 +8,9 @@ require("dotenv").config();
 
 const bcrypt = require("bcrypt");
 const pool = require("../src/config/db");
+const {
+  generateTicketCode,
+} = require("../src/features/registrations/ticketCode");
 
 const USERS = [
   {
@@ -247,6 +251,55 @@ const seedEvents = async (client) => {
   console.log(`Events: ${EVENTS.length} demo events ready`);
 };
 
+/**
+ * Registers the demo attendee to the first two published events (each with a ticket)
+ * and checks in the first ticket. Skips an event the attendee is already registered
+ * to, so running the seed again never creates duplicates.
+ * @param {import("pg").PoolClient} client
+ * @returns {Promise<void>}
+ */
+const seedRegistrations = async (client) => {
+  const titles = EVENTS.filter((e) => e.status === "published")
+    .slice(0, 2)
+    .map((e) => e.title);
+
+  for (const [index, title] of titles.entries()) {
+    const { rows } = await client.query(
+      `INSERT INTO registrations (event_id, user_id)
+       SELECT e.id, u.id
+       FROM events e, users u
+       WHERE e.title = $1 AND u.email = 'attendee@eventflow.com'
+         AND NOT EXISTS (
+           SELECT 1 FROM registrations r
+           WHERE r.event_id = e.id AND r.user_id = u.id AND r.status = 'confirmed'
+         )
+       RETURNING id`,
+      [title],
+    );
+    if (rows.length === 0) continue;
+
+    let ticketCreated = false;
+    while (!ticketCreated) {
+      const { rowCount } = await client.query(
+        `INSERT INTO tickets (registration_id, ticket_code)
+         VALUES ($1, $2)
+         ON CONFLICT (ticket_code) DO NOTHING`,
+        [rows[0].id, generateTicketCode()],
+      );
+      ticketCreated = rowCount > 0;
+    }
+
+    // the first ticket of the demo is already checked in
+    if (index === 0) {
+      await client.query(
+        "UPDATE tickets SET checked_in_at = NOW() WHERE registration_id = $1",
+        [rows[0].id],
+      );
+    }
+  }
+  console.log("Registrations: demo attendee registrations ready (2 events)");
+};
+
 const run = async () => {
   const client = await pool.connect();
   try {
@@ -255,6 +308,7 @@ const run = async () => {
     await seedCategories(client);
     await seedVenues(client);
     await seedEvents(client);
+    await seedRegistrations(client);
     await client.query("COMMIT");
     console.log("Seed completed");
   } catch (error) {
