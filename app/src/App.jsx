@@ -14,6 +14,8 @@ import AdminCategoriesView from "./features/categories/views/AdminCategoriesView
 import AdminVenuesView from "./features/venues/views/AdminVenuesView";
 import EventsView from "./features/events/views/EventsView";
 import EventDetailsView from "./features/events/views/EventDetailsView";
+import OrganizerDashboardView from "./features/events/views/OrganizerDashboardView";
+import EventFormView from "./features/events/views/EventFormView";
 
 function App() {
   return (
@@ -33,6 +35,19 @@ function App() {
           <Route path="/security" element={<SecuritySettingsView />} />
           <Route path="/events" element={<EventsView />} />
           <Route path="/events/:id" element={<EventDetailsView />} />
+
+          {/* organizers (and admins, who can manage every event) */}
+          <Route element={<ProtectedRoute roles={["organizer", "admin"]} />}>
+            <Route
+              path="/organizer/dashboard"
+              element={<OrganizerDashboardView />}
+            />
+            <Route path="/organizer/events/new" element={<EventFormView />} />
+            <Route
+              path="/organizer/events/:id/edit"
+              element={<EventFormView />}
+            />
+          </Route>
 
           {/* admin only */}
           <Route element={<ProtectedRoute roles={["admin"]} />}>

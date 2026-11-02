@@ -25,6 +25,8 @@ export const NAV_ITEMS = {
     { to: "/profile", label: "Profile", icon: "◉" },
   ], // navigation items for attendee role
   organizer: [
+    { to: "/organizer/dashboard", label: "Dashboard", icon: "▦" },
+    { to: "/organizer/events/new", label: "Create event", icon: "＋" },
     { to: "/events", label: "Events", icon: "▦" },
     { to: "/profile", label: "Profile", icon: "◉" },
   ], // navigation items for organizer role
@@ -39,5 +41,8 @@ export const NAV_ITEMS = {
 export const getNavItems = (role) => NAV_ITEMS[role] || []; // returns navigation items for the given role
 
 // first page a user sees after logging in
-export const getHomePath = (role) =>
-  role === "admin" ? "/admin/users" : "/events";
+export const getHomePath = (role) => {
+  if (role === "admin") return "/admin/users";
+  if (role === "organizer") return "/organizer/dashboard";
+  return "/events";
+};
