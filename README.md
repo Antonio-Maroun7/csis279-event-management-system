@@ -8,7 +8,7 @@ CSIS279 (Advances in Computer Science) midterm implementation, University of Bal
 2. [Midterm Scope](#2-midterm-scope)
 3. [Implemented Features](#3-implemented-features)
 4. [Final Project – Planned Continuation](#4-final-project--planned-continuation)
-5. [Technology Stack](#5-technology-stack)
+5. [Technologies, Libraries & Tools](#5-technologies-libraries--tools)
 6. [Project Structure](#6-project-structure)
 7. [Backend Architecture](#7-backend-architecture)
 8. [Database Schema](#8-database-schema)
@@ -19,7 +19,8 @@ CSIS279 (Advances in Computer Science) midterm implementation, University of Bal
 13. [Testing](#13-testing)
 14. [Validation & Security Measures](#14-validation--security-measures)
 15. [Midterm Demo Flow](#15-midterm-demo-flow)
-16. [Final Project Roadmap](#16-final-project-roadmap)
+16. [Future Work (Final Project)](#16-future-work-final-project)
+17. [Midterm Requirements Checklist](#17-midterm-requirements-checklist)
 
 ---
 
@@ -27,13 +28,13 @@ CSIS279 (Advances in Computer Science) midterm implementation, University of Bal
 
 EventFlow is a full-stack web application for publishing and managing events. Three kinds of users share one system:
 
-| Role | What they do |
-|---|---|
-| **Attendee** | Creates an account, browses published events (search, category and city filters, pagination) and opens event details. |
+| Role          | What they do                                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Attendee**  | Creates an account, browses published events (search, category and city filters, pagination) and opens event details.                                        |
 | **Organizer** | Creates events, saves drafts, publishes, edits, cancels and deletes drafts from a dashboard with statistics. An organizer manages **only their own** events. |
-| **Admin** | Manages users (roles, deletion, 2FA reset), categories and venues, and can manage every event. |
+| **Admin**     | Manages users (roles, deletion, 2FA reset), categories and venues, and can manage every event.                                                               |
 
-Main technologies: React 19 + Vite + React Router on the front end, Node.js + Express 5 on the back end, PostgreSQL for storage, JWT + bcrypt for authentication and TOTP two-factor authentication.
+Main technologies: React 19 + Vite + React Router on the front end, Node.js + Express 5 on the back end, PostgreSQL for storage, JWT + bcrypt for authentication and TOTP two-factor authentication. Socket.IO is already installed and will power the real-time features (live seat counts and notifications) in the final project.
 
 ## 2. Midterm Scope
 
@@ -50,7 +51,21 @@ Completed for the midterm:
 
 ## 3. Implemented Features
 
+### At a glance
+
+| Area                                                                  | Attendee  | Organizer     | Admin                    | Status                        |
+| --------------------------------------------------------------------- | --------- | ------------- | ------------------------ | ----------------------------- |
+| Register, login, logout, profile, change password                     | ✅        | ✅            | ✅                       | Done                          |
+| TOTP two-factor authentication (QR, backup codes)                     | ✅        | ✅            | ✅ (+ reset other users) | Done                          |
+| Browse events (search, filters, pagination) and event details         | ✅        | ✅            | ✅                       | Done                          |
+| Organizer dashboard, create / edit / publish / cancel / delete events | –         | ✅ own events | ✅ all events            | Done                          |
+| Manage users, venues, categories                                      | –         | –             | ✅                       | Done                          |
+| Register to events, tickets, check-in                                 | API ready | API ready     | API ready                | Backend done, UI in the final |
+| Notifications                                                         | –         | –             | –                        | Final project                 |
+| Real-time updates with Socket.IO                                      | –         | –             | –                        | Final project                 |
+
 ### Authentication & 2FA
+
 - Register (always creates an `attendee`), login, client-side logout, "remember me" (token stored in `localStorage` or `sessionStorage`).
 - Route guards in React (`GuestRoute`, `ProtectedRoute` with roles, `RoleLayout`) and the same role checks on the backend.
 - TOTP 2FA (Google Authenticator, Microsoft Authenticator, Authy…):
@@ -61,31 +76,39 @@ Completed for the midterm:
   - the 2FA secret is encrypted in the database with AES-256-GCM.
 
 ### Users
+
 - View and edit own profile, change password (current password required).
 - Admin: user list with search, role filter and pagination, role change, delete (blocked when the user has events or registrations), reset 2FA. An admin cannot change or delete their own account.
 
 ### Categories
+
 - Public list. Admin: create, rename, delete (delete is blocked while events use the category).
 
 ### Venues
+
 - Public list. Admin: create, edit, delete. A venue name is unique per city (case-insensitive), capacity must be between 1 and 100000, the capacity cannot be lowered under an active event's capacity, and delete is blocked while events use the venue.
 
 ### Events (attendee side)
+
 - Browse published events that have not ended, with search, category filter, city filter and server-side pagination.
 - Event details: category, venue, organizer, price, seats taken / capacity with a progress bar, cancelled / ended notices, share link.
 - Pages are available **after login** (the API endpoints are public).
 
 ### Organizer dashboard & event management
+
 - Dashboard statistics (total events, confirmed registrations, upcoming events, cancelled events) and a searchable, filterable, paginated table of the organizer's events.
 - Event form (create / edit) with a publish checklist: save draft, publish, or save changes.
 - Publish a draft, cancel an event (confirmation modal), delete drafts only.
 - Rules enforced by the API: capacity ≤ venue capacity, start time in the future, end after start, **a venue cannot be booked by two events at overlapping times (409)**, capacity cannot go below the seats already taken, an organizer can only change their own events (403), drafts are invisible to other users (404).
 
 ### Admin pages
+
 - Users, Venues and Categories pages (`/admin/users`, `/admin/venues`, `/admin/categories`) with tables, filters, forms in modals and confirmation dialogs.
 
 ### Registrations & tickets (backend API only)
+
 Implemented in `api/src/features/registrations`, without a frontend in this version:
+
 - register to an event: one transaction with `SELECT … FOR UPDATE` on the event row so the last seat cannot be taken twice; a ticket with a unique code (`EVT-XXXXXXX`) is created;
 - cancel a registration (the seat becomes free), list "my registrations" (upcoming / past / cancelled), get my registration for an event;
 - attendee list with statistics for the event owner or an admin, and check-in by ticket code.
@@ -93,29 +116,70 @@ Implemented in `api/src/features/registrations`, without a frontend in this vers
 ## 4. Final Project – Planned Continuation
 
 These features remain part of the approved project scope and are planned for the final-project development phase.
+The details, including the planned Socket.IO design, are in [Future Work](#16-future-work-final-project).
 
-| Feature | Current preparation |
-|---|---|
-| Registration interface (Register button on Event Details, My Tickets page) | Backend endpoints already exist and are documented below. |
-| Electronic ticket view and the Attendees & Check-in page | `tickets` table and check-in endpoint already exist. |
-| Notifications (API + UI) | The `notifications` table already exists in the database. |
-| Real-time seat updates with Socket.IO | The `socket.io` package is installed in `api/package.json` but not wired yet. |
-| Combined Admin Dashboard overview (view 12) | Users, venues and categories pages already exist separately. |
-| Automated tests | Not written yet. |
+| Feature                                                                    | Current preparation                                                           |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Registration interface (Register button on Event Details, My Tickets page) | Backend endpoints already exist and are documented below.                     |
+| Electronic ticket view and the Attendees & Check-in page                   | `tickets` table and check-in endpoint already exist.                          |
+| Notifications (API + UI)                                                   | The `notifications` table already exists in the database.                     |
+| Real-time seat updates with Socket.IO                                      | The `socket.io` package is installed in `api/package.json` but not wired yet. |
+| Combined Admin Dashboard overview (view 12)                                | Users, venues and categories pages already exist separately.                  |
+| Automated tests                                                            | Not written yet.                                                              |
 
-## 5. Technology Stack
+## 5. Technologies, Libraries & Tools
 
-| Area | Technology |
-|---|---|
-| Front end | React 19, Vite 8, React Router 7 (`react-router-dom`), plain CSS with our own reusable components (no Bootstrap) |
-| Front-end tooling | Oxlint |
-| Back end | Node.js, Express 5, `cors`, `dotenv` |
-| Database | PostgreSQL, `pg` (node-postgres) |
-| Authentication | JWT (`jsonwebtoken`), `bcrypt` |
-| Validation | `express-validator` |
-| Two-factor authentication | `speakeasy` (TOTP), `qrcode`, AES-256-GCM through Node `crypto` |
-| Real time | `socket.io` – installed, planned for the final project |
-| Development | `nodemon` |
+### Main technologies
+
+| Area                      | Technology                                                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Front end                 | React 19 with Vite 8 and React Router 7, plain CSS with our own reusable components (no UI framework such as Bootstrap) |
+| Back end                  | Node.js with Express 5 (REST API)                                                                                       |
+| Database                  | PostgreSQL, accessed with node-postgres (`pg`) and parameterized SQL                                                    |
+| Authentication            | JWT access tokens + bcrypt password hashing                                                                             |
+| Two-factor authentication | TOTP (RFC 6238) with QR codes, secrets encrypted with AES-256-GCM                                                       |
+| Real time                 | Socket.IO – installed, planned for the final project (see [Future Work](#16-future-work-final-project))                 |
+
+### Third-party libraries
+
+Back end (`api/package.json`):
+
+| Library             | Version | Used for                                                                 |
+| ------------------- | ------- | ------------------------------------------------------------------------ |
+| `express`           | ^5.3.0  | HTTP server, routing and middleware                                      |
+| `pg`                | ^8.23.1 | PostgreSQL connection pool and queries                                   |
+| `express-validator` | ^7.3.2  | Validation and sanitizing of bodies, params and query strings            |
+| `jsonwebtoken`      | ^9.0.3  | Signing and verifying JWTs (access token and 2FA temp token)             |
+| `bcrypt`            | ^6.0.0  | Password hashing                                                         |
+| `speakeasy`         | ^2.0.0  | TOTP secrets and 6-digit code verification                               |
+| `qrcode`            | ^1.5.4  | QR code image for the authenticator app                                  |
+| `cors`              | ^2.8.6  | Allows the React app (`CLIENT_URL`) to call the API                      |
+| `dotenv`            | ^18.0.7 | Loads the `.env` configuration                                           |
+| `socket.io`         | ^4.8.4  | Installed for the real-time features of the final project (not used yet) |
+| `nodemon` (dev)     | ^3.1.14 | Restarts the API when a file changes                                     |
+
+Front end (`app/package.json`):
+
+| Library                      | Version | Used for                                |
+| ---------------------------- | ------- | --------------------------------------- |
+| `react`, `react-dom`         | ^19.3.1 | User interface                          |
+| `react-router-dom`           | ^7.18.4 | Pages, protected and role-based routes  |
+| `vite` (dev)                 | ^8.3.4  | Development server and production build |
+| `@vitejs/plugin-react` (dev) | ^6.1.2  | React support in Vite                   |
+| `oxlint` (dev)               | ^1.88.0 | Linting (`npm run lint`)                |
+
+Node.js built-in `crypto` is used for AES-256-GCM encryption, SHA-256 hashing of backup codes and random ticket codes.
+
+### Tools
+
+| Tool                                                   | Used for                                        |
+| ------------------------------------------------------ | ----------------------------------------------- |
+| PostgreSQL + pgAdmin 4                                 | Database server, running SQL and the migrations |
+| Visual Studio Code                                     | Code editor                                     |
+| Git + GitHub                                           | Version control and hosting of the repository   |
+| Postman / Thunder Client                               | Testing the REST API                            |
+| Google Authenticator / Microsoft Authenticator / Authy | Scanning the 2FA QR code and generating codes   |
+| Browser DevTools (device toolbar)                      | Testing the responsive (phone-width) layout     |
 
 ## 6. Project Structure
 
@@ -157,15 +221,15 @@ csis279-event-management-system/
 
 Back-end layers of every feature:
 
-| File | Responsibility |
-|---|---|
-| `*.entity.js` | One database row (snake_case columns). |
-| `*.mapper.js` / `*.dto.js` | Entity → response DTO (secrets are never copied) and request → fields. |
-| `*.repository.js` | The only layer that writes SQL (parameterized queries). |
-| `*.service.js` | Business rules, throws `AppError`. |
-| `*.controller.js` | Reads the request, calls the service, sends JSON. |
-| `*.validator.js` | `express-validator` rules, ending with the shared `validate` middleware. |
-| `*.routes.js` | URL → middleware → controller. |
+| File                       | Responsibility                                                           |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `*.entity.js`              | One database row (snake_case columns).                                   |
+| `*.mapper.js` / `*.dto.js` | Entity → response DTO (secrets are never copied) and request → fields.   |
+| `*.repository.js`          | The only layer that writes SQL (parameterized queries).                  |
+| `*.service.js`             | Business rules, throws `AppError`.                                       |
+| `*.controller.js`          | Reads the request, calls the service, sends JSON.                        |
+| `*.validator.js`           | `express-validator` rules, ending with the shared `validate` middleware. |
+| `*.routes.js`              | URL → middleware → controller.                                           |
 
 Front-end flow: **View → hooks (`useForm`, `useFetch`, `useDebounce`) → feature service → `apiFetch` → API**. Components never call `fetch` directly.
 
@@ -174,8 +238,8 @@ Front-end flow: **View → hooks (`useForm`, `useFetch`, `useDebounce`) → feat
 ```
 Request
   → Route
-  → validators (express-validator) + validate middleware
-  → authenticate / authorize          (protected routes)
+  → authenticate / authorize          (protected routes: who are you, are you allowed?)
+  → validators (express-validator) + validate middleware   (is the input correct?)
   → Controller
   → Service      (business rules, throws AppError)
   → Repository   (parameterized SQL)
@@ -192,26 +256,26 @@ Request
 
 The database is PostgreSQL. Every foreign key uses `ON DELETE RESTRICT`, except the backup codes (`CASCADE`).
 
-| Table | Purpose | Key columns | Constraints |
-|---|---|---|---|
-| `users` | Accounts | `id`, `first_name`, `last_name`, `email`, `password_hash`, `role`, `two_factor_secret`, `two_factor_enabled` | `email` unique; `role` in attendee / organizer / admin; 2FA cannot be enabled without a secret |
-| `categories` | Event categories | `id`, `name` | `name` unique |
-| `venues` | Places | `id`, `name`, `address`, `city`, `max_capacity` | `max_capacity > 0`; unique `(LOWER(name), LOWER(city))` (migration 002) |
-| `events` | Events | `id`, `organizer_id`, `venue_id`, `category_id`, `title`, `description`, `start_time`, `end_time`, `capacity`, `price`, `status` | FK to `users`, `venues`, `categories`; `end_time > start_time`; `capacity > 0`; `price >= 0`; status in draft / published / cancelled / completed; indexes on category, organizer, start time, status, venue |
-| `registrations` | A user's seat in an event | `id`, `event_id`, `user_id`, `status`, `registered_at`, `cancelled_at` | FK to `events`, `users`; status in confirmed / cancelled; **unique `(event_id, user_id)` while confirmed** |
-| `tickets` | Electronic ticket of a registration | `id`, `registration_id`, `ticket_code`, `checked_in_at` | `registration_id` unique (1:1); `ticket_code` unique |
-| `notifications` | Messages for users | `id`, `user_id`, `event_id`, `type`, `message`, `is_read` | FK to `users`, `events`; type in updated / cancelled / reminder |
-| `two_factor_backup_codes` | One-time 2FA backup codes (SHA-256 hashes) | `id`, `user_id`, `code_hash`, `used_at` | FK to `users` with `ON DELETE CASCADE` (migration 001) |
+| Table                     | Purpose                                    | Key columns                                                                                                                      | Constraints                                                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `users`                   | Accounts                                   | `id`, `first_name`, `last_name`, `email`, `password_hash`, `role`, `two_factor_secret`, `two_factor_enabled`                     | `email` unique; `role` in attendee / organizer / admin; 2FA cannot be enabled without a secret                                                                                                               |
+| `categories`              | Event categories                           | `id`, `name`                                                                                                                     | `name` unique                                                                                                                                                                                                |
+| `venues`                  | Places                                     | `id`, `name`, `address`, `city`, `max_capacity`                                                                                  | `max_capacity > 0`; unique `(LOWER(name), LOWER(city))` (migration 002)                                                                                                                                      |
+| `events`                  | Events                                     | `id`, `organizer_id`, `venue_id`, `category_id`, `title`, `description`, `start_time`, `end_time`, `capacity`, `price`, `status` | FK to `users`, `venues`, `categories`; `end_time > start_time`; `capacity > 0`; `price >= 0`; status in draft / published / cancelled / completed; indexes on category, organizer, start time, status, venue |
+| `registrations`           | A user's seat in an event                  | `id`, `event_id`, `user_id`, `status`, `registered_at`, `cancelled_at`                                                           | FK to `events`, `users`; status in confirmed / cancelled; **unique `(event_id, user_id)` while confirmed**                                                                                                   |
+| `tickets`                 | Electronic ticket of a registration        | `id`, `registration_id`, `ticket_code`, `checked_in_at`                                                                          | `registration_id` unique (1:1); `ticket_code` unique                                                                                                                                                         |
+| `notifications`           | Messages for users                         | `id`, `user_id`, `event_id`, `type`, `message`, `is_read`                                                                        | FK to `users`, `events`; type in updated / cancelled / reminder                                                                                                                                              |
+| `two_factor_backup_codes` | One-time 2FA backup codes (SHA-256 hashes) | `id`, `user_id`, `code_hash`, `used_at`                                                                                          | FK to `users` with `ON DELETE CASCADE` (migration 001)                                                                                                                                                       |
 
 Relationships: a user (organizer) has many events; a category and a venue have many events; an event has many registrations; a registration has exactly one ticket. Seats taken are not stored: they are counted from confirmed registrations.
 
 Usage in this version:
 
-| Tables | Used by |
-|---|---|
-| `users`, `categories`, `venues`, `events`, `two_factor_backup_codes` | The midterm user interface and the API |
-| `registrations`, `tickets` | The backend API only (no user interface yet). The seed inserts two demo registrations. |
-| `notifications` | Not used yet (planned for the final) |
+| Tables                                                               | Used by                                                                                |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `users`, `categories`, `venues`, `events`, `two_factor_backup_codes` | The midterm user interface and the API                                                 |
+| `registrations`, `tickets`                                           | The backend API only (no user interface yet). The seed inserts two demo registrations. |
+| `notifications`                                                      | Not used yet (planned for the final)                                                   |
 
 SQL files, in the order to run them:
 
@@ -224,73 +288,80 @@ SQL files, in the order to run them:
 Base URL: `http://localhost:3000/api`. Protected routes need the header `Authorization: Bearer <token>`. Lists use `?page=&limit=` (limit 1–100) and return `total`, `page`, `limit`, `total_pages`.
 
 ### Health
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| GET | `/health` | – | – | API and database status |
+
+| Method | Endpoint  | Auth | Role | Purpose                 |
+| ------ | --------- | ---- | ---- | ----------------------- |
+| GET    | `/health` | –    | –    | API and database status |
 
 ### Authentication & two-factor
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| POST | `/auth/register` | – | – | Create an attendee account and return a JWT |
-| POST | `/auth/login` | – | – | Login; when 2FA is on returns `requires_two_factor` and a `temp_token` |
-| POST | `/auth/2fa/verify` | `temp_token` in body | – | Second login step (6-digit code or backup code) |
-| GET | `/auth/2fa/status` | JWT | any | 2FA on/off and backup codes left |
-| POST | `/auth/2fa/setup` | JWT | any | Create a secret and a QR code |
-| POST | `/auth/2fa/enable` | JWT | any | Confirm a code, enable 2FA, return backup codes |
-| POST | `/auth/2fa/disable` | JWT | any | Disable 2FA with an app code or a backup code |
-| POST | `/auth/2fa/backup-codes` | JWT | any | Create new backup codes |
+
+| Method | Endpoint                 | Auth                 | Role | Purpose                                                                |
+| ------ | ------------------------ | -------------------- | ---- | ---------------------------------------------------------------------- |
+| POST   | `/auth/register`         | –                    | –    | Create an attendee account and return a JWT                            |
+| POST   | `/auth/login`            | –                    | –    | Login; when 2FA is on returns `requires_two_factor` and a `temp_token` |
+| POST   | `/auth/2fa/verify`       | `temp_token` in body | –    | Second login step (6-digit code or backup code)                        |
+| GET    | `/auth/2fa/status`       | JWT                  | any  | 2FA on/off and backup codes left                                       |
+| POST   | `/auth/2fa/setup`        | JWT                  | any  | Create a secret and a QR code                                          |
+| POST   | `/auth/2fa/enable`       | JWT                  | any  | Confirm a code, enable 2FA, return backup codes                        |
+| POST   | `/auth/2fa/disable`      | JWT                  | any  | Disable 2FA with an app code or a backup code                          |
+| POST   | `/auth/2fa/backup-codes` | JWT                  | any  | Create new backup codes                                                |
 
 ### Users
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| GET | `/users/me` | JWT | any | Own profile |
-| PUT | `/users/me` | JWT | any | Edit first and last name |
-| PATCH | `/users/me/password` | JWT | any | Change password |
-| GET | `/users?search=&role=&page=&limit=` | JWT | admin | User list with counts per role |
-| GET | `/users/:id` | JWT | admin | One user |
-| PATCH | `/users/:id/role` | JWT | admin | Change a role |
-| DELETE | `/users/:id` | JWT | admin | Delete a user |
-| DELETE | `/users/:id/two-factor` | JWT | admin | Reset a user's 2FA |
+
+| Method | Endpoint                            | Auth | Role  | Purpose                        |
+| ------ | ----------------------------------- | ---- | ----- | ------------------------------ |
+| GET    | `/users/me`                         | JWT  | any   | Own profile                    |
+| PUT    | `/users/me`                         | JWT  | any   | Edit first and last name       |
+| PATCH  | `/users/me/password`                | JWT  | any   | Change password                |
+| GET    | `/users?search=&role=&page=&limit=` | JWT  | admin | User list with counts per role |
+| GET    | `/users/:id`                        | JWT  | admin | One user                       |
+| PATCH  | `/users/:id/role`                   | JWT  | admin | Change a role                  |
+| DELETE | `/users/:id`                        | JWT  | admin | Delete a user                  |
+| DELETE | `/users/:id/two-factor`             | JWT  | admin | Reset a user's 2FA             |
 
 ### Categories
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| GET | `/categories?search=` | – | – | List categories |
-| GET | `/categories/:id` | – | – | One category |
-| POST | `/categories` | JWT | admin | Create |
-| PUT | `/categories/:id` | JWT | admin | Rename |
-| DELETE | `/categories/:id` | JWT | admin | Delete (409 if used by events) |
+
+| Method | Endpoint              | Auth | Role  | Purpose                        |
+| ------ | --------------------- | ---- | ----- | ------------------------------ |
+| GET    | `/categories?search=` | –    | –     | List categories                |
+| GET    | `/categories/:id`     | –    | –     | One category                   |
+| POST   | `/categories`         | JWT  | admin | Create                         |
+| PUT    | `/categories/:id`     | JWT  | admin | Rename                         |
+| DELETE | `/categories/:id`     | JWT  | admin | Delete (409 if used by events) |
 
 ### Venues
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| GET | `/venues?search=&city=` | – | – | List venues |
-| GET | `/venues/:id` | – | – | One venue |
-| POST | `/venues` | JWT | admin | Create |
-| PUT | `/venues/:id` | JWT | admin | Edit |
-| DELETE | `/venues/:id` | JWT | admin | Delete (409 if used by events) |
+
+| Method | Endpoint                | Auth | Role  | Purpose                        |
+| ------ | ----------------------- | ---- | ----- | ------------------------------ |
+| GET    | `/venues?search=&city=` | –    | –     | List venues                    |
+| GET    | `/venues/:id`           | –    | –     | One venue                      |
+| POST   | `/venues`               | JWT  | admin | Create                         |
+| PUT    | `/venues/:id`           | JWT  | admin | Edit                           |
+| DELETE | `/venues/:id`           | JWT  | admin | Delete (409 if used by events) |
 
 ### Events
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| GET | `/events?search=&category_id=&city=&page=&limit=` | – | – | Published events that have not ended |
-| GET | `/events/manage?status=&search=&page=&limit=` | JWT | organizer, admin | Own events (all events for admin) + dashboard statistics |
-| GET | `/events/:id` | optional | – | Event details (a draft is visible only to its owner and admins) |
-| POST | `/events` | JWT | organizer, admin | Create (`status`: `draft` or `published`) |
-| PUT | `/events/:id` | JWT | organizer (owner), admin | Edit |
-| PATCH | `/events/:id/publish` | JWT | organizer (owner), admin | Publish a draft |
-| PATCH | `/events/:id/cancel` | JWT | organizer (owner), admin | Cancel |
-| DELETE | `/events/:id` | JWT | organizer (owner), admin | Delete a draft |
+
+| Method | Endpoint                                          | Auth     | Role                     | Purpose                                                         |
+| ------ | ------------------------------------------------- | -------- | ------------------------ | --------------------------------------------------------------- |
+| GET    | `/events?search=&category_id=&city=&page=&limit=` | –        | –                        | Published events that have not ended                            |
+| GET    | `/events/manage?status=&search=&page=&limit=`     | JWT      | organizer, admin         | Own events (all events for admin) + dashboard statistics        |
+| GET    | `/events/:id`                                     | optional | –                        | Event details (a draft is visible only to its owner and admins) |
+| POST   | `/events`                                         | JWT      | organizer, admin         | Create (`status`: `draft` or `published`)                       |
+| PUT    | `/events/:id`                                     | JWT      | organizer (owner), admin | Edit                                                            |
+| PATCH  | `/events/:id/publish`                             | JWT      | organizer (owner), admin | Publish a draft                                                 |
+| PATCH  | `/events/:id/cancel`                              | JWT      | organizer (owner), admin | Cancel                                                          |
+| DELETE | `/events/:id`                                     | JWT      | organizer (owner), admin | Delete a draft                                                  |
 
 ### Registrations & tickets – Backend ready, frontend planned for the final
-| Method | Endpoint | Auth | Role | Purpose |
-|---|---|---|---|---|
-| POST | `/events/:eventId/register` | JWT | attendee | Register and create the ticket |
-| GET | `/events/:eventId/my-registration` | JWT | any | My confirmed registration for the event (or `null`) |
-| GET | `/events/:eventId/attendees?search=&checked_in=&page=&limit=` | JWT | organizer (owner), admin | Attendees with statistics |
-| POST | `/events/:eventId/check-in` | JWT | organizer (owner), admin | Check in with `{ "ticket_code": "EVT-XXXXXXX" }` |
-| GET | `/registrations/me?status=upcoming\|past\|cancelled&page=&limit=` | JWT | attendee | My registrations |
-| PATCH | `/registrations/:id/cancel` | JWT | attendee (own) | Cancel my registration |
+
+| Method | Endpoint                                                          | Auth | Role                     | Purpose                                             |
+| ------ | ----------------------------------------------------------------- | ---- | ------------------------ | --------------------------------------------------- |
+| POST   | `/events/:eventId/register`                                       | JWT  | attendee                 | Register and create the ticket                      |
+| GET    | `/events/:eventId/my-registration`                                | JWT  | any                      | My confirmed registration for the event (or `null`) |
+| GET    | `/events/:eventId/attendees?search=&checked_in=&page=&limit=`     | JWT  | organizer (owner), admin | Attendees with statistics                           |
+| POST   | `/events/:eventId/check-in`                                       | JWT  | organizer (owner), admin | Check in with `{ "ticket_code": "EVT-XXXXXXX" }`    |
+| GET    | `/registrations/me?status=upcoming\|past\|cancelled&page=&limit=` | JWT  | attendee                 | My registrations                                    |
+| PATCH  | `/registrations/:id/cancel`                                       | JWT  | attendee (own)           | Cancel my registration                              |
 
 ### Examples
 
@@ -337,7 +408,12 @@ With 2FA enabled the response is `{ "message": "Enter your two-factor code to co
       "seats_left": 100,
       "is_past": false,
       "category": { "id": 1, "name": "Technology" },
-      "venue": { "id": 1, "name": "Innovation Hall", "city": "Koura", "max_capacity": 300 },
+      "venue": {
+        "id": 1,
+        "name": "Innovation Hall",
+        "city": "Koura",
+        "max_capacity": 300
+      },
       "organizer": { "id": 3, "first_name": "Antonio", "last_name": "Maroun" }
     }
   ],
@@ -363,22 +439,22 @@ copy .env.example .env        # Windows (cmd / PowerShell)
 
 **`api/.env`**
 
-| Variable | Purpose |
-|---|---|
-| `PORT` | API port (default `3000`) |
-| `NODE_ENV` | `development` |
-| `CLIENT_URL` | Front-end origin allowed by CORS (default `http://localhost:5173`) |
-| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | PostgreSQL connection (`DB_NAME=event_management_system`) |
-| `JWT_SECRET` | Long random string used to sign tokens (**required**, the server will not start without it) |
-| `JWT_EXPIRES_IN` | Token lifetime, for example `1d` |
-| `TWO_FACTOR_ENCRYPTION_KEY` | Long random string that encrypts the 2FA secrets. Do not change it after users enabled 2FA. |
+| Variable                                                  | Purpose                                                                                     |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `PORT`                                                    | API port (default `3000`)                                                                   |
+| `NODE_ENV`                                                | `development`                                                                               |
+| `CLIENT_URL`                                              | Front-end origin allowed by CORS (default `http://localhost:5173`)                          |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | PostgreSQL connection (`DB_NAME=event_management_system`)                                   |
+| `JWT_SECRET`                                              | Long random string used to sign tokens (**required**, the server will not start without it) |
+| `JWT_EXPIRES_IN`                                          | Token lifetime, for example `1d`                                                            |
+| `TWO_FACTOR_ENCRYPTION_KEY`                               | Long random string that encrypts the 2FA secrets. Do not change it after users enabled 2FA. |
 
 Generate a random value with: `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
 
 **`app/.env`**
 
-| Variable | Purpose |
-|---|---|
+| Variable       | Purpose                                                              |
+| -------------- | -------------------------------------------------------------------- |
 | `VITE_API_URL` | Base URL of the API, `http://localhost:3000/api` (must match `PORT`) |
 
 ## 11. Installation & Setup
@@ -386,44 +462,55 @@ Generate a random value with: `node -e "console.log(require('crypto').randomByte
 **Prerequisites:** Node.js (a current LTS version; the project was developed with Node 24), npm, PostgreSQL.
 
 1. Clone the repository:
-   ```bash
+
+```bash
    git clone https://github.com/Antonio-Maroun7/csis279-event-management-system.git
    cd csis279-event-management-system
-   ```
+```
+
 2. Create the database:
-   ```bash
+
+```bash
    psql -U postgres -c "CREATE DATABASE event_management_system;"
-   ```
+```
+
 3. Restore the schema. The dump is a plain SQL file that contains `psql` commands, so restore it with `psql`:
-   ```bash
+
+```bash
    psql -U postgres -d event_management_system -f database/event_management_system.sql
-   ```
+```
+
 4. Run the migrations, in this order:
-   ```bash
+
+```bash
    psql -U postgres -d event_management_system -f database/migrations/001_two_factor_backup_codes.sql
    psql -U postgres -d event_management_system -f database/migrations/002_venues_unique_name_city.sql
-   ```
+```
+
 5. Create the two `.env` files (see section 10), then install the dependencies:
-   ```bash
+
+```bash
    cd api
    npm install
    cd ../app
    npm install
-   ```
+```
+
 6. Insert the demo data (every run resets the three demo accounts below to their documented password and role; the other rows are only inserted when missing):
-   ```bash
+
+```bash
    cd ../api
    npm run seed
-   ```
+```
 
 ## 12. Running the Application
 
 Open two terminals:
 
-| Terminal | Commands | Address |
-|---|---|---|
-| API | `cd api` then `npm run dev` (or `npm start`) | `http://localhost:3000` (port from `api/.env`) |
-| Front end | `cd app` then `npm run dev` | `http://localhost:5173` |
+| Terminal  | Commands                                     | Address                                        |
+| --------- | -------------------------------------------- | ---------------------------------------------- |
+| API       | `cd api` then `npm run dev` (or `npm start`) | `http://localhost:3000` (port from `api/.env`) |
+| Front end | `cd app` then `npm run dev`                  | `http://localhost:5173`                        |
 
 Quick check that the API works: open `http://localhost:3000/api/health`. It must answer `{"status":"ok","database":"connected",…}`.
 
@@ -435,11 +522,11 @@ Front-end scripts: `npm run build` (production build) and `npm run lint` (Oxlint
 
 **Demo accounts** created or reset by `npm run seed` (running the seed again restores these three accounts to the password and role shown below):
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@eventflow.com` | `Admin12345` |
+| Role      | Email                     | Password       |
+| --------- | ------------------------- | -------------- |
+| Admin     | `admin@eventflow.com`     | `Admin12345`   |
 | Organizer | `organizer@eventflow.com` | `Organizer123` |
-| Attendee | `attendee@eventflow.com` | `Attendee123` |
+| Attendee  | `attendee@eventflow.com`  | `Attendee123`  |
 
 The seed also creates 7 categories, 5 venues, 6 events (5 published and 1 draft, dated in the future) and two demo registrations for the attendee.
 
@@ -467,8 +554,7 @@ The seed also creates 7 categories, 5 venues, 6 events (5 published and 1 draft,
 - **Database integrity:** foreign keys with `RESTRICT`, `CHECK` and `UNIQUE` constraints, a partial unique index for one confirmed registration per user and event.
 - **Concurrency:** the last seat is protected by a transaction with `SELECT … FOR UPDATE`.
 - **CORS** is limited to `CLIENT_URL`. `.env` files are ignored by Git; only `.env.example` files with placeholders are committed.
-
-Known limitations (planned for the final):
+  Known limitations (planned for the final):
 
 - No rate limiting on login and 2FA codes.
 - The role inside a token is not re-read from the database, so a role change applies at the user's next sign-in.
@@ -481,17 +567,51 @@ Known limitations (planned for the final):
 1. Start PostgreSQL, the API and the front end. Open `/api/health`.
 2. **Register** a new attendee and show the validation messages (weak password, existing email), then log out.
 3. **Attendee:** browse events, use search, category and city filters and pagination, open Event Details. Try to open `/organizer/dashboard` → redirected (role protection).
-4. **Two-factor authentication:** open *Security settings*, scan the QR code, enable 2FA and save the backup codes. Log out and log in again with the 6-digit code (and show a backup code once).
+4. **Two-factor authentication:** open _Security settings_, scan the QR code, enable 2FA and save the backup codes. Log out and log in again with the 6-digit code (and show a backup code once).
 5. **Organizer:** open the dashboard statistics, create an event as a draft, publish it, edit it, then try to book the same venue at an overlapping time to show the **409 double-booking** message. Cancel an event with the confirmation modal and delete a draft.
-6. **Admin:** *Users* (search, role filter, pagination, change a role, reset 2FA), *Venues* and *Categories* (create, edit, delete, and show the validation and "in use" errors).
+6. **Admin:** _Users_ (search, role filter, pagination, change a role, reset 2FA), _Venues_ and _Categories_ (create, edit, delete, and show the validation and "in use" errors).
 7. Show the **phone-width layout** (bottom navigation) from the browser's device toolbar.
 8. Mention the backend-only registration API (transaction + `FOR UPDATE`) and the final-project roadmap.
 
-## 16. Final Project Roadmap
+## 16. Future Work (Final Project)
 
-- Registration interface: Register button on Event Details and the My Tickets page.
-- Electronic ticket view and the Attendees & Check-in page.
-- Notifications (API and interface), using the existing `notifications` table.
-- Real-time seat updates and notifications with Socket.IO.
-- Combined Admin Dashboard overview.
-- Rate limiting for login and 2FA, and automated tests.
+The midterm version is intentionally incomplete. The final development phase extends it with the remaining functionality of the approved proposal:
+
+| Planned feature                      | What it will do                                                                                                                    | Already prepared                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Registration interface               | "Register now" button on Event Details, cancel registration, **My Tickets** page                                                   | All registration endpoints (section 9)                                      |
+| Electronic tickets & check-in        | Ticket view with QR code, **Attendees & Check-in** page for organizers, CSV export                                                 | `tickets` table, attendee list and check-in endpoints                       |
+| Notifications                        | Notifications page and bell counter: event updated, event cancelled, reminders                                                     | `notifications` table                                                       |
+| **Real-time updates with Socket.IO** | Live seat counts and instant notifications without refreshing the page                                                             | `socket.io` package installed, `server.js` already creates an `http` server |
+| Admin dashboard overview             | One page with platform statistics (users, venues, categories, published events)                                                    | Separate admin pages exist                                                  |
+| Security & quality                   | Rate limiting on login and 2FA, role re-checked from the database, atomic double-booking check, automated tests (Jest + Supertest) | –                                                                           |
+
+### Planned real-time design with Socket.IO
+
+Socket.IO is **not implemented yet**. The plan for the final project is:
+
+1. **Server:** attach Socket.IO to the HTTP server that `server.js` already creates (`new Server(server, { cors: { origin: CLIENT_URL } })`), and authenticate each connection with the same JWT (`socket.handshake.auth.token`).
+2. **Rooms:** a client viewing an event joins the room `event:<id>`; every logged-in user also joins a personal room `user:<id>`.
+3. **Live seats:** after a registration or a cancellation is committed, the service emits `seats:updated` with `{ eventId, seats_taken, seats_left }` to `event:<id>`, so every open Event Details page updates its seat counter instantly.
+4. **Notifications:** when an organizer updates or cancels an event, a row is saved in `notifications` for each registered attendee and `notification:new` is emitted to their `user:<id>` room (bell counter + Notifications page).
+5. **Client:** `socket.io-client` in React with a small hook (for example `useEventSocket(eventId)`) that joins the room and updates the page state.
+   The REST API stays the source of truth: Socket.IO only pushes changes that were already saved in PostgreSQL.
+
+## 17. Midterm Requirements Checklist
+
+How this repository answers the CSIS279 midterm requirements:
+
+| Requirement                                         | Where it is covered                                                                                                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Develop the project based on the approved proposal  | Event management with three roles, as in the proposal; remaining modules listed in [Future Work](#16-future-work-final-project)                                        |
+| React frontend                                      | `app/` – React 19 + Vite, feature folders, reusable components, protected and role-based routes                                                                        |
+| Express/Node.js backend for data and business logic | `api/` – Express 5, routes → controllers → services → repositories                                                                                                     |
+| Database to store and retrieve data                 | PostgreSQL, 8 tables with foreign keys and constraints ([section 8](#8-database-schema))                                                                               |
+| Additional features from the proposal               | TOTP 2FA with backup codes, organizer dashboard, venue double-booking prevention, last-seat transaction for registrations                                              |
+| Error handling, validation and security             | `AppError` + central error handler, express-validator, bcrypt, JWT, role and ownership checks, encrypted 2FA secrets ([section 14](#14-validation--security-measures)) |
+| Documentation: setup instructions                   | [Installation & Setup](#11-installation--setup), [Running](#12-running-the-application)                                                                                |
+| Documentation: API endpoints and usage              | [REST API](#9-rest-api) with examples                                                                                                                                  |
+| Documentation: database schema                      | [Database Schema](#8-database-schema)                                                                                                                                  |
+| Documentation: third-party libraries and tools      | [Technologies, Libraries & Tools](#5-technologies-libraries--tools)                                                                                                    |
+| Documentation: how to run and test                  | [Running](#12-running-the-application), [Testing](#13-testing)                                                                                                         |
+| Live demo                                           | [Midterm Demo Flow](#15-midterm-demo-flow)                                                                                                                             |
