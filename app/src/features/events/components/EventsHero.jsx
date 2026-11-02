@@ -10,8 +10,8 @@ const EventsHero = () => {
       </div>
       <h1>Find an event worth remembering.</h1>
       <p>
-        Explore workshops, talks, sports and community events. Register in
-        seconds and stay updated in real time.
+        Explore workshops, talks, sports and community events and find the one
+        that fits you.
       </p>
       <div className="hero-actions">
         <a className="btn btn-primary" href="#upcoming-events">

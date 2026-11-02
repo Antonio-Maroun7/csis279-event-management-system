@@ -4,9 +4,9 @@ import useAuth from "../context/useAuth";
 import LoginForm from "../components/LoginForm";
 
 const FEATURES = [
-  { title: "Live availability", text: "Seat counts update without refresh." },
+  { title: "Seat availability", text: "See how many seats are left." },
   { title: "Secure access", text: "Role-based access and optional 2FA." },
-  { title: "Instant alerts", text: "Never miss an important update." },
+  { title: "Easy management", text: "Organizers publish and manage events." },
 ];
 
 const LoginView = () => {
@@ -26,9 +26,9 @@ const LoginView = () => {
 
   return (
     <AuthLayout
-      eyebrow="REAL-TIME EVENT MANAGEMENT"
+      eyebrow="EVENT MANAGEMENT"
       title="Everything your event needs, in one place."
-      text="Create, discover and manage memorable events with live seat updates, secure tickets and instant notifications."
+      text="Create, discover and manage memorable events with clear seat availability and secure, role-based access."
       features={FEATURES}
     >
       <LoginForm

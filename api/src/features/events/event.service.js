@@ -129,7 +129,10 @@ class EventService {
     const fields = EventDto.fromRequest(body);
     const status = body.status || "draft";
 
-    await EventService.checkEventRules(fields, { startMustBeFuture: true });
+    await EventService.checkEventRules(fields, {
+      organizerId: user.id,
+      startMustBeFuture: true,
+    });
 
     const id = await EventRepository.create(user.id, fields, status);
     return EventService.getEventById(id, user);
@@ -164,6 +167,7 @@ class EventService {
 
     await EventService.checkEventRules(fields, {
       excludeId: id,
+      organizerId: event.organizer_id,
       startMustBeFuture: startChanged,
     });
 
@@ -280,11 +284,15 @@ class EventService {
   /**
    * Rules shared by create and update.
    * @param {Object} fields - see EventDto.fromRequest
-   * @param {{ excludeId?: number, startMustBeFuture: boolean }} options
+   * @param {{ excludeId?: number, organizerId: number, startMustBeFuture: boolean }} options
+   * organizerId: owner of the event; the title of a conflicting event is shown only to its own organizer.
    * @returns {Promise<void>}
    * @throws {AppError} 400 field error or 409 venue already booked
    */
-  static async checkEventRules(fields, { excludeId, startMustBeFuture }) {
+  static async checkEventRules(
+    fields,
+    { excludeId, organizerId, startMustBeFuture },
+  ) {
     if (startMustBeFuture && new Date(fields.start_time) <= new Date()) {
       throw fieldError("start_time", "Start time must be in the future");
     }
@@ -314,8 +322,11 @@ class EventService {
       excludeId,
     });
     if (overlapping) {
+      const booked = `${venue.name} is already booked at that time`;
       throw AppError.conflict(
-        `${venue.name} is already booked at that time for "${overlapping.title}"`,
+        overlapping.organizer_id === organizerId
+          ? `${booked} for "${overlapping.title}"`
+          : booked,
       );
     }
   }

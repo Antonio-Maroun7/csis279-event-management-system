@@ -3,7 +3,7 @@ import Modal from "../../../shared/components/ui/Modal";
 
 /**
  * "Cancel this event?" dialog from the design.
- * Registrations and tickets are kept for history; attendees are notified.
+ * Registrations and tickets are kept for history.
  */
 const CancelEventModal = ({ event, loading, onConfirm, onClose }) => {
   return (
@@ -28,12 +28,7 @@ const CancelEventModal = ({ event, loading, onConfirm, onClose }) => {
         <>
           <p>
             You are about to cancel <b>{event.title}</b>. The event will no
-            longer accept registrations
-            {event.seats_taken > 0 &&
-              `, and its ${event.seats_taken} registered ${
-                event.seats_taken === 1 ? "attendee" : "attendees"
-              } will be notified`}
-            .
+            longer accept registrations.
           </p>
           <div className="notice notice-danger mt-3">
             This action changes the event status to cancelled. Existing

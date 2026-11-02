@@ -240,7 +240,7 @@ class EventRepository {
    * [start_time, end_time). Two events touching (one ends at 12:00, the next
    * starts at 12:00) do not overlap.
    * @param {{ venue_id: number, start_time: string, end_time: string, excludeId?: number }} slot
-   * @returns {Promise<{ id: number, title: string, start_time: Date, end_time: Date }|null>}
+   * @returns {Promise<{ id: number, organizer_id: number, title: string, start_time: Date, end_time: Date }|null>}
    */
   static async findOverlapping({ venue_id, start_time, end_time, excludeId }) {
     const params = [venue_id, start_time, end_time];
@@ -252,7 +252,7 @@ class EventRepository {
     }
 
     const { rows } = await pool.query(
-      `SELECT id, title, start_time, end_time
+      `SELECT id, organizer_id, title, start_time, end_time
        FROM events
        WHERE venue_id = $1
          AND status IN ('draft', 'published')

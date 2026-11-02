@@ -40,6 +40,9 @@ const toRequestBody = (values) => ({
   price: Number(values.price),
 });
 
+/** true when a datetime-local value is later than now. */
+const isInFuture = (value) => Boolean(value) && new Date(value) > new Date();
+
 /**
  * Create / edit form (design 08). The side card holds the buttons:
  * onSave(body, action) with action = "draft" | "publish" | "save".
@@ -96,7 +99,7 @@ const EventForm = ({ event, categories, venues, onSave, onCancelEvent }) => {
     },
     {
       label: "Start time is in the future",
-      done: Boolean(values.start_time && start > new Date()),
+      done: isInFuture(values.start_time),
     },
   ];
 

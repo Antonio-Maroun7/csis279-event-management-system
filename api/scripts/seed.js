@@ -160,7 +160,8 @@ const EVENTS = [
 ];
 
 /**
- * Inserts the demo users.
+ * Inserts the demo users. These 3 accounts always get their documented
+ * password and role, even when the email already exists.
  * @param {import("pg").PoolClient} client
  * @returns {Promise<void>}
  */
@@ -170,7 +171,10 @@ const seedUsers = async (client) => {
     await client.query(
       `INSERT INTO users (first_name, last_name, email, password_hash, role)
        VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (email) DO NOTHING`,
+       ON CONFLICT (email) DO UPDATE
+       SET password_hash = EXCLUDED.password_hash,
+           role = EXCLUDED.role,
+           updated_at = NOW()`,
       [user.first_name, user.last_name, user.email, passwordHash, user.role],
     );
   }

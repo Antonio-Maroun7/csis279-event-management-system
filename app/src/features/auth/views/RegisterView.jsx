@@ -3,9 +3,9 @@ import useAuth from "../context/useAuth";
 import RegisterForm from "../components/RegisterForm";
 
 const FEATURES = [
-  { title: "One account", text: "Manage registrations and tickets." },
-  { title: "Fast check-in", text: "Use a unique electronic ticket code." },
-  { title: "Stay informed", text: "Updates are saved even while offline." },
+  { title: "One account", text: "Manage your profile in one place." },
+  { title: "Find events", text: "Search by title, category or city." },
+  { title: "Secure access", text: "Protect your account with optional 2FA." },
 ];
 
 const RegisterView = () => {
@@ -25,7 +25,7 @@ const RegisterView = () => {
     <AuthLayout
       eyebrow="JOIN THE EXPERIENCE"
       title="Your next event starts here."
-      text="Discover local events, keep your tickets organized and receive real-time updates from organizers."
+      text="Discover local events, filter them by category or city and see how many seats are left."
       features={FEATURES}
     >
       <RegisterForm onSubmit={handleRegister} />

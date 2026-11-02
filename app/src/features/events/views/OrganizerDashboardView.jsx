@@ -116,9 +116,16 @@ const OrganizerDashboardView = () => {
     setDeleting(true);
     // deleting the last row of a page goes back one page
     if (events.length === 1 && page > 1) {
-      await deleteEvent(eventToDelete.id).catch((err) => setError(err.message));
-      setPage(page - 1);
-      setSuccess(`Draft "${eventToDelete.title}" was deleted.`);
+      try {
+        setError("");
+        setSuccess("");
+        await deleteEvent(eventToDelete.id);
+        setPage(page - 1);
+        setSuccess(`Draft "${eventToDelete.title}" was deleted.`);
+      } catch (err) {
+        await reload();
+        setError(err.message);
+      }
     } else {
       await runAction(
         () => deleteEvent(eventToDelete.id),
